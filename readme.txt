@@ -28,3 +28,7 @@ $ lsmod | grep ch34x
 
 // 查看设备
 dmesg | tail -n 10
+
+// root 运行 CH34XRelay.py
+$ su root
+$ python3 api.py

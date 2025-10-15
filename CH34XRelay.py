@@ -61,23 +61,26 @@ class CH341Relay:
         """发送十六进制指令"""
         if not self.ser or not self.ser.is_open:
             print("⚠️ 串口未打开，无法发送指令。")
-            return
+            return False
         data = bytes.fromhex(cmd_hex)
         self.ser.write(data)
         print(f"➡️ 发送指令: {cmd_hex}")
         time.sleep(0.05)
+        return True
 
     def open_channel(self, ch=1, feedback=False):
         """打开指定通道"""
         cmd = f"A0 {ch:02X} {'03' if feedback else '01'} {0xA0 + ch + (3 if feedback else 1):02X}"
-        self._send_cmd(cmd)
+        ok = self._send_cmd(cmd)
         print(f"🟢 打开第{ch}路{'(反馈)' if feedback else ''}")
+        return ok
 
     def close_channel(self, ch=1, feedback=False):
         """关闭指定通道"""
         cmd = f"A0 {ch:02X} {'02' if feedback else '00'} {0xA0 + ch + (2 if feedback else 0):02X}"
-        self._send_cmd(cmd)
+        ok = self._send_cmd(cmd)
         print(f"🔴 关闭第{ch}路{'(反馈)' if feedback else ''}")
+        return ok
 
     def toggle_channel(self, ch=1):
         """取反开关状态并反馈"""
@@ -113,4 +116,4 @@ if __name__ == "__main__":
             relay.open_channel(1)
             time.sleep(1)
             relay.close_channel(1)
-            time.sleep(1)
+
