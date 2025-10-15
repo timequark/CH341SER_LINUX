@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gate Control</title>
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: "Segoe UI", sans-serif;
+      position: relative;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5rem;        /* 放大字体 */
+      font-weight: 700;
+      position: absolute;
+      top: 5%;                 /* 距离页面顶部 5% */
+      text-align: center;
+    }
+
+    .button-container {
+      position: absolute;
+      top: 50%;                /* 垂直居中按钮区域 */
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .button {
+      width: 200px;
+      height: 60px;
+      margin: 2.5vh 0;         /* 两个按钮间隔约为页面高度的5% */
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .open {
+      background-color: #28a745;
+    }
+
+    .open:hover {
+      background-color: #218838;
+    }
+
+    .close {
+      background-color: #dc3545;
+    }
+
+    .close:hover {
+      background-color: #c82333;
+    }
+
+    #status {
+      position: absolute;
+      bottom: 8%;
+      font-size: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gate Control Panel</h1>
+
+  <div class="button-container">
+    <button class="button open" onclick="sendCommand('gate-open')">Open</button>
+    <button class="button close" onclick="sendCommand('gate-close')">Close</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script>
+    async function sendCommand(action) {
+      const url = `http://192.168.110.140:5153/${action}`;
+      const statusDiv = document.getElementById("status");
+      statusDiv.textContent = "Sending request...";
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          statusDiv.textContent = `✅ Command '${action}' sent successfully!`;
+        } else {
+          statusDiv.textContent = `⚠️ Server responded with status: ${response.status}`;
+        }
+      } catch (error) {
+        statusDiv.textContent = `❌ Failed to send request: ${error}`;
+      }
+    }
+  </script>
+</body>
+</html>

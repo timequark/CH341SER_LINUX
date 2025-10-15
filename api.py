@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile, Query, HTTPException,Form
 from fastapi.responses import JSONResponse, Response
-from CH34XRelay import CH341Relay
+from CH34XRelay import CH341RelayMonitor
 
 # Get the current script's directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +21,7 @@ sys.path.append(parent_dir)
 
 VERSION = '1.0.0'
 
-gateCtl = CH341Relay()
+gateCtl = CH341RelayMonitor()
 
 app = FastAPI(title="Wecode Gate-Machine API", version=VERSION)
 app.add_middleware(
@@ -41,7 +41,7 @@ async def gate_open():
                 "code": 202,
                 'msg': "打开闸机失败"
             }
-        time.sleep(0.2)
+        time.sleep(0.1)
         gateCtl.close_channel(1)
         return {"code": 200, "msg": "打开闸机成功"}
     except Exception as e:
@@ -60,7 +60,7 @@ async def gate_close():
                 "code": 202,
                 'msg': "关闭闸机失败"
             }
-        time.sleep(0.2)
+        time.sleep(0.1)
         gateCtl.close_channel(2)
         return {"code": 200, "msg": "关闭闸机成功"}
     except Exception as e:

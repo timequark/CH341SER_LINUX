@@ -29,6 +29,12 @@ $ lsmod | grep ch34x
 // 查看设备
 dmesg | tail -n 10
 
-// root 运行 CH34XRelay.py
-$ su root
+// gate-ctl 启动
+$ cd /opt/CH341SER_LINUX
+$ source .venv/bin/activate
 $ python3 api.py
+
+// gate-web 启动
+$ cd /opt/gate-web
+$ source .venv/bin/activate
+$ python3 -m http.server 8080 --directory /opt/gate-web
