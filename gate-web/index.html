@@ -1,108 +1,1032 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gate Control</title>
-  <style>
-    body {
-      height: 100vh;
-      margin: 0;
-      background: linear-gradient(135deg, #e0eafc, #cfdef3);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: "Segoe UI", sans-serif;
-      position: relative;
-    }
-
-    h1 {
-      color: #333;
-      font-size: 2.5rem;        /* 放大字体 */
-      font-weight: 700;
-      position: absolute;
-      top: 5%;                 /* 距离页面顶部 5% */
-      text-align: center;
-    }
-
-    .button-container {
-      position: absolute;
-      top: 50%;                /* 垂直居中按钮区域 */
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .button {
-      width: 200px;
-      height: 60px;
-      margin: 2.5vh 0;         /* 两个按钮间隔约为页面高度的5% */
-      font-size: 1.2rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      color: white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: all 0.2s ease;
-    }
-
-    .button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .open {
-      background-color: #28a745;
-    }
-
-    .open:hover {
-      background-color: #218838;
-    }
-
-    .close {
-      background-color: #dc3545;
-    }
-
-    .close:hover {
-      background-color: #c82333;
-    }
-
-    #status {
-      position: absolute;
-      bottom: 8%;
-      font-size: 1rem;
-      color: #555;
-    }
-  </style>
-</head>
-<body>
-  <h1>Gate Control Panel</h1>
-
-  <div class="button-container">
-    <button class="button open" onclick="sendCommand('gate-open')">Open</button>
-    <button class="button close" onclick="sendCommand('gate-close')">Close</button>
-  </div>
-
-  <div id="status"></div>
-
-  <script>
-    async function sendCommand(action) {
-      const url = `http://192.168.110.140:5153/${action}`;
-      const statusDiv = document.getElementById("status");
-      statusDiv.textContent = "Sending request...";
-      try {
-        const response = await fetch(url);
-        if (response.ok) {
-          statusDiv.textContent = `✅ Command '${action}' sent successfully!`;
-        } else {
-          statusDiv.textContent = `⚠️ Server responded with status: ${response.status}`;
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智慧停车缴费系统</title>
+    <link
+      rel="stylesheet"
+      href="./all.min.css"
+      crossorigin="anonymous"
+    />
+    <script src="./tailwindcss.js"></script>
+    <script>
+      // 配置Tailwind自定义主题
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#2563eb',
+              secondary: '#10b981',
+              danger: '#ef4444',
+              warning: '#f59e0b',
+              info: '#3b82f6',
+              light: '#f3f4f6',
+              dark: '#1f2937',
+            },
+            fontFamily: {
+              sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Noto Sans', 'Helvetica', 'Arial', 'sans-serif'],
+            },
+          },
         }
-      } catch (error) {
-        statusDiv.textContent = `❌ Failed to send request: ${error}`;
       }
-    }
-  </script>
-</body>
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .bg-gradient-parking {
+          background: linear-gradient(to bottom, #eff6ff, #ffffff);
+        }
+        .transition-smooth {
+          transition: all 0.3s ease-in-out;
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+        .animate-slide-up {
+          animation: slideUp 0.5s ease-in-out;
+        }
+        .animate-pulse-slow {
+          animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-parking min-h-screen font-sans">
+    <!-- 页面容器 -->
+    <div id="app" class="min-h-screen p-6">
+      <!-- 首页 -->
+      <div id="home" class="page flex flex-col items-center justify-center min-h-screen">
+        <div class="text-center">
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">智慧停车缴费系统</h1>
+          <p class="text-gray-500">正在进入系统...</p>
+        </div>
+      </div>
+
+      <!-- 扫描页 -->
+      <div id="scan" class="page hidden flex flex-col items-center justify-center min-h-screen">
+        <!-- 停车场品牌标识 -->
+        <div class="w-40 h-40 bg-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg animate-fade-in">
+          <i class="fa-solid fa-parking text-white text-7xl"></i>
+        </div>
+
+        <!-- 加载提示 -->
+        <div class="text-center animate-slide-up" style="animation-delay: 0.2s">
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">智慧停车</h1>
+          <p class="text-gray-600 mb-6">正在处理您的请求...</p>
+          
+          <!-- 加载动画 -->
+          <div class="flex justify-center">
+            <div class="w-12 h-12 border-4 border-t-blue-600 border-blue-100 rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 车牌输入页 -->
+      <div id="plate-input" class="page hidden min-h-screen">
+        <div class="mb-8 animate-slide-up">
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">输入车牌号码</h1>
+          <p class="text-gray-500">请输入您的车牌信息进行查询</p>
+        </div>
+        
+        <!-- 车牌输入区域 -->
+        <div class="mb-8 animate-slide-up" style="animation-delay: 0.2s">
+          <div class="flex items-center">
+            <!-- 省份选择器 -->
+            <div 
+              id="province-selector" 
+              class="w-16 h-16 bg-white border-2 border-gray-300 rounded-l-lg flex items-center justify-center font-bold text-xl cursor-pointer shadow-sm"
+            >
+              <div class="flex items-center justify-center">
+                <span id="selected-province">苏</span>
+                <i class="fa-solid fa-chevron-down text-xs ml-1 text-gray-400"></i>
+              </div>
+            </div>
+            <!-- 车牌输入框 -->
+            <div class="flex-1">
+              <input
+                id="plate-number"
+                type="text"
+                value="AA8888"
+                placeholder="请输入车牌号码"
+                class="w-full h-16 text-xl font-bold border-2 border-gray-300 border-l-0 rounded-r-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                maxLength="7"
+                autoFocus
+              />
+            </div>
+          </div>
+          
+          <!-- 错误提示语 -->
+          <div id="input-error" class="mt-2 pl-16 hidden">
+            <p class="text-red-500 text-sm"></p>
+          </div>
+
+          <!-- 省份选择弹窗 -->
+          <div id="province-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+            <div class="bg-white rounded-xl p-4 max-h-[70vh] overflow-y-auto w-full max-w-xs">
+              <h3 class="text-lg font-bold mb-4 text-center">选择省份</h3>
+              <div id="province-grid" class="grid grid-cols-5 gap-2">
+                <!-- 省份选择项会通过JavaScript动态生成 -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 新能源车牌提示 -->
+        <div class="mb-12 text-center text-gray-500 text-sm animate-slide-up" style="animation-delay: 0.3s">
+          <p>新能源车牌请直接输入完整车牌号码</p>
+        </div>
+
+        <!-- 查询按钮 -->
+        <button id="query-button" class="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-300 flex items-center justify-center animate-slide-up" style="animation-delay: 0.4s">
+          查询停车信息
+        </button>
+
+        <!-- 底部备用闸机控制按钮 -->
+        <div class="fixed bottom-4 left-0 right-0 flex justify-center space-x-4 px-4">
+          <button 
+            id="gate-open-btn"
+            class="w-10 h-10 bg-green-500/70 text-white rounded-full flex items-center justify-center z-40"
+            title="开闸(备用)"
+          >
+            <i class="fa-solid fa-gate-open text-lg"></i>
+          </button>
+          
+          <button 
+            id="gate-close-btn"
+            class="w-10 h-10 bg-red-500/70 text-white rounded-full flex items-center justify-center z-40"
+            title="关闸(备用)"
+          >
+            <i class="fa-solid fa-gate-closed text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 支付信息页 -->
+      <div id="payment-info" class="page hidden min-h-screen">
+        <div class="mb-8 animate-slide-up">
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">停车缴费信息</h1>
+          <p class="text-gray-500">请确认您的停车信息</p>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="payment-info-loading" class="hidden flex flex-col items-center justify-center min-h-screen">
+          <div class="w-12 h-12 border-4 border-t-blue-600 border-blue-100 rounded-full animate-spin mb-4"></div>
+          <p class="text-gray-600">正在获取停车信息...</p>
+        </div>
+
+        <!-- 车牌信息确认区域 -->
+        <div id="plate-info-section" class="bg-white rounded-xl p-6 shadow-lg mb-6 animate-slide-up" style="animation-delay: 0.2s">
+          <h2 class="text-lg font-semibold text-gray-700 mb-4">车牌信息</h2>
+          <div id="plate-display" class="flex items-center">
+            <div class="w-12 h-12 bg-blue-600 text-white font-bold text-xl rounded-lg flex items-center justify-center mr-3 shadow-sm">
+              <span id="display-province">苏</span>
+            </div>
+            <div class="h-12 bg-white border-2 border-gray-300 rounded-lg px-4 flex items-center justify-center shadow-sm">
+              <span id="display-plate" class="font-bold text-xl">AA8888</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 停车时长显示 -->
+        <div class="bg-white rounded-xl p-6 shadow-lg mb-6 animate-slide-up" style="animation-delay: 0.3s">
+          <h2 class="text-lg font-semibold text-gray-700 mb-4">停车详情</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between">
+              <span class="text-gray-500">入场时间</span>
+              <span id="start-time" class="font-medium">2025-10-14 14:49:38</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">停车时长</span>
+              <span id="duration" class="font-medium">2小时30分钟</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">费用计算</span>
+              <span id="fee-details" class="font-medium">首小时10元，后续每小时5元</span>
+            </div>
+            <div class="pt-4 border-t border-gray-200 flex justify-between items-center">
+              <span class="text-lg font-bold text-gray-800">应付金额</span>
+              <span id="total-fee" class="text-2xl font-bold text-red-600">¥20.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 支付方式选择 -->
+        <div class="space-y-4 mb-8 animate-slide-up" style="animation-delay: 0.4s">
+          <h2 class="text-lg font-semibold text-gray-700 mb-4">选择支付方式</h2>
+          
+          <!-- 支付宝 -->
+          <div 
+            id="alipay-option"
+            class="p-6 bg-white rounded-xl shadow-md flex items-center justify-between cursor-pointer transition-all duration-300 ring-2 ring-blue-500 shadow-lg"
+          >
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                <i class="fa-brands fa-alipay text-white text-2xl"></i>
+              </div>
+              <span class="font-medium text-lg">支付宝</span>
+            </div>
+            <div class="w-6 h-6 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+              <i class="fa-solid fa-check text-white text-xs"></i>
+            </div>
+          </div>
+
+          <!-- 微信支付 -->
+          <div 
+            id="wechat-option"
+            class="p-6 bg-white rounded-xl shadow-md flex items-center justify-between cursor-pointer transition-all duration-300"
+          >
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                <i class="fa-brands fa-weixin text-white text-2xl"></i>
+              </div>
+              <span class="font-medium text-lg">微信支付</span>
+            </div>
+            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
+            </div>
+          </div>
+        </div>
+
+        <!-- 演示数据标注 -->
+        <div class="mb-8 text-center animate-slide-up" style="animation-delay: 0.5s">
+          <span class="inline-block px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+            当前为演示信息
+          </span>
+        </div>
+
+        <!-- 立即缴费按钮 -->
+        <button 
+          id="pay-now-button"
+          class="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-300 flex items-center justify-center animate-slide-up" 
+          style="animation-delay: 0.6s"
+        >
+          <span id="pay-button-text">立即缴费</span>
+        </button>
+      </div>
+
+      <!-- 支付选择页 -->
+      <div id="payment-select" class="page hidden min-h-screen">
+        <div class="mb-8 animate-slide-up">
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">选择支付方式</h1>
+          <p class="text-gray-500">请选择您偏好的支付方式</p>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="payment-select-loading" class="hidden flex flex-col items-center justify-center min-h-screen">
+          <p class="text-gray-600">加载中...</p>
+        </div>
+
+        <!-- 支付金额确认 -->
+        <div class="bg-white rounded-xl p-6 shadow-lg mb-8 text-center animate-slide-up" style="animation-delay: 0.2s">
+          <h2 class="text-lg font-semibold text-gray-700 mb-2">支付金额</h2>
+          <p id="payment-select-amount" class="text-4xl font-bold text-red-600">¥20.00</p>
+        </div>
+
+        <!-- 支付方式选择 -->
+        <div class="space-y-4 mb-8 animate-slide-up" style="animation-delay: 0.3s">
+          <!-- 支付宝 -->
+          <div 
+            id="payment-select-alipay"
+            class="p-6 bg-white rounded-xl shadow-md flex items-center justify-between cursor-pointer transition-all duration-300 ring-2 ring-blue-500 shadow-lg"
+          >
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                <i class="fa-brands fa-alipay text-white text-2xl"></i>
+              </div>
+              <span class="font-medium text-lg">支付宝</span>
+            </div>
+            <div class="w-6 h-6 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+              <i class="fa-solid fa-check text-white text-xs"></i>
+            </div>
+          </div>
+
+          <!-- 微信支付 -->
+          <div 
+            id="payment-select-wechat"
+            class="p-6 bg-white rounded-xl shadow-md flex items-center justify-between cursor-pointer transition-all duration-300"
+          >
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                <i class="fa-brands fa-weixin text-white text-2xl"></i>
+              </div>
+              <span class="font-medium text-lg">微信支付</span>
+            </div>
+            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
+            </div>
+          </div>
+        </div>
+
+        <!-- 确认支付按钮 -->
+        <button 
+          id="confirm-payment-button"
+          class="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-300 flex items-center justify-center animate-slide-up" 
+          style="animation-delay: 0.4s"
+        >
+          <span id="confirm-button-text">确认支付</span>
+        </button>
+      </div>
+
+      <!-- 成功页面 -->
+      <div id="success" class="page hidden min-h-screen">
+        <!-- 缴费成功提示 -->
+        <div class="flex flex-col items-center justify-center mb-8 animate-fade-in">
+          <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <i class="fa-solid fa-check text-4xl text-green-500"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-800">缴费成功</h1>
+          <p id="payment-time" class="text-gray-500 mt-2">支付时间: </p>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="success-loading" class="hidden flex flex-col items-center justify-center min-h-screen">
+          <p class="text-gray-600">加载中...</p>
+        </div>
+
+        <!-- 支付金额确认 -->
+        <div class="bg-white rounded-xl p-6 shadow-lg mb-8 text-center animate-slide-up" style="animation-delay: 0.2s">
+          <p class="text-lg text-gray-600 mb-2">支付金额</p>
+          <p id="success-payment-amount" class="text-4xl font-bold text-red-600">¥20.00</p>
+        </div>
+
+        <!-- 闸机动画 -->
+        <div class="flex flex-col items-center justify-center mb-12 animate-slide-up" style="animation-delay: 0.3s">
+          <h2 class="text-xl font-semibold text-gray-700 mb-6">闸机已开启</h2>
+          
+          <!-- 简化的闸机抬杆示意 -->
+          <div class="relative w-40 h-32 flex items-center justify-center mb-8">
+            <!-- 固定支架 -->
+            <div class="absolute bottom-8 left-4 w-6 h-6 bg-gray-800 rounded-md flex items-center justify-center">
+              <i class="fa-solid fa-circle-dot text-white text-xs"></i>
+            </div>
+            
+            <!--  活动闸杆 -->
+            <div 
+              id="gate-bar"
+              class="absolute bottom-10 left-7 w-20 h-2 bg-blue-600 rounded-full shadow-md"
+              style="transform-origin: left center; transition: transform 1.2s ease-in-out;"
+            />
+          </div>
+
+          <!-- 引导语 -->
+          <p class="text-lg text-gray-700 font-medium">祝您一路顺风！</p>
+        </div>
+
+        <!-- 返回首页按钮 -->
+        <button 
+          id="back-to-home-button"
+          class="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-300 flex items-center justify-center animate-slide-up" 
+          style="animation-delay: 0.4s"
+        >
+          返回首页
+        </button>
+      </div>
+    </div>
+
+    <!-- 自定义Toast通知 -->
+    <div id="toast" class="fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 flex items-center z-50 hidden">
+      <i id="toast-icon" class="fa-solid fa-info-circle mr-2"></i>
+      <span id="toast-message"></span>
+    </div>
+
+    <script>
+      // 页面管理
+      const PageManager = {
+        currentPage: 'home',
+        
+        // 显示指定页面
+        showPage(pageId) {
+          // 隐藏所有页面
+          document.querySelectorAll('.page').forEach(page => {
+            page.classList.add('hidden');
+          });
+          
+          // 显示目标页面
+          const targetPage = document.getElementById(pageId);
+          if (targetPage) {
+            targetPage.classList.remove('hidden');
+            this.currentPage = pageId;
+            
+            // 重置表单和状态
+            this.resetPageState(pageId);
+            
+            // 触发页面特定逻辑
+            this.handlePageLoad(pageId);
+          }
+        },
+        
+        // 重置页面状态
+        resetPageState(pageId) {
+          // 重置输入错误状态
+          const errorElement = document.getElementById('input-error');
+          if (errorElement) {
+            errorElement.classList.add('hidden');
+          }
+          
+          // 重置按钮状态
+          const payButton = document.getElementById('pay-now-button');
+          if (payButton) {
+            payButton.classList.remove('bg-gray-400');
+            payButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            payButton.disabled = false;
+          }
+          
+          const payButtonText = document.getElementById('pay-button-text');
+          if (payButtonText) {
+            payButtonText.innerHTML = '立即缴费';
+          }
+          
+          const confirmButton = document.getElementById('confirm-payment-button');
+          if (confirmButton) {
+            confirmButton.classList.remove('bg-gray-400');
+            confirmButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            confirmButton.disabled = false;
+          }
+          
+          const confirmButtonText = document.getElementById('confirm-button-text');
+          if (confirmButtonText) {
+            confirmButtonText.innerHTML = '确认支付';
+          }
+        },
+        
+        // 处理页面加载
+        handlePageLoad(pageId) {
+          switch(pageId) {
+            case 'home':
+              // 首页自动跳转到扫描页
+              setTimeout(() => {
+                this.showPage('scan');
+              }, 500);
+              break;
+              
+            case 'scan':
+              // 扫描页自动跳转到车牌输入页
+              setTimeout(() => {
+                this.showPage('plate-input');
+              }, 800);
+              break;
+              
+            case 'plate-input':
+              // 初始化省份选择器
+              initProvinceSelector();
+              break;
+              
+            case 'payment-info':
+              // 加载停车信息
+              loadPaymentInfo();
+              break;
+              
+            case 'payment-select':
+              // 加载支付信息
+              loadPaymentSelectInfo();
+              break;
+              
+            case 'success':
+              // 显示支付成功信息
+              showSuccessInfo();
+              // 执行闸机抬杆动画
+              setTimeout(() => {
+                const gateBar = document.getElementById('gate-bar');
+                if (gateBar) {
+                  gateBar.style.transform = 'rotate(-90deg)';
+                }
+              }, 500);
+              break;
+          }
+        }
+      };
+
+      // 中国省份简称列表
+      const PROVINCE_CODES = [
+        '京', '津', '冀', '晋', '蒙', '辽', '吉', '黑', '沪', '苏', '浙', '皖', '闽', '赣', '鲁', 
+        '豫', '鄂', '湘', '粤', '桂', '琼', '渝', '川', '贵', '云', '藏', '陕', '甘', '青', '宁', '新'
+      ];
+
+      // 初始化省份选择器
+      function initProvinceSelector() {
+        const provinceGrid = document.getElementById('province-grid');
+        const provinceSelector = document.getElementById('province-selector');
+        const provinceModal = document.getElementById('province-modal');
+        const selectedProvince = document.getElementById('selected-province');
+        
+        // 清空并重新填充省份选择项
+        provinceGrid.innerHTML = '';
+        
+        // 创建省份选择项
+        PROVINCE_CODES.forEach(province => {
+          const provinceItem = document.createElement('div');
+          provinceItem.className = `h-12 rounded-lg flex items-center justify-center font-bold cursor-pointer ${
+            selectedProvince.textContent === province ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-800'
+          }`;
+          provinceItem.textContent = province;
+          
+          // 添加点击事件
+          provinceItem.addEventListener('click', () => {
+            selectedProvince.textContent = province;
+            provinceModal.classList.add('hidden');
+          });
+          
+          provinceGrid.appendChild(provinceItem);
+        });
+        
+        // 显示/隐藏省份选择弹窗
+        provinceSelector.addEventListener('click', () => {
+          provinceModal.classList.toggle('hidden');
+        });
+        
+        // 点击弹窗外区域关闭弹窗
+        provinceModal.addEventListener('click', (e) => {
+          if (e.target === provinceModal) {
+            provinceModal.classList.add('hidden');
+          }
+        });
+      }
+
+      // 验证车牌号码
+      function validatePlateNumber(plateNumber) {
+        const plateRegex = /^[A-Za-z0-9]{5,6}$/;
+        return plateRegex.test(plateNumber);
+      }
+
+      // 显示Toast通知
+      function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+        
+        // 设置消息内容
+        toastMessage.textContent = message;
+        
+        // 设置图标
+        toastIcon.className = 'fa-solid mr-2';
+        switch(type) {
+          case 'error':
+            toastIcon.classList.add('fa-times-circle', 'text-red-400');
+            break;
+          case 'success':
+            toastIcon.classList.add('fa-check-circle', 'text-green-400');
+            break;
+          case 'info':
+          default:
+            toastIcon.classList.add('fa-info-circle', 'text-blue-400');
+            break;
+        }
+        
+        // 显示Toast
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+          toast.classList.add('opacity-100');
+        }, 10);
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+          toast.classList.remove('opacity-100');
+          setTimeout(() => {
+            toast.classList.add('hidden');
+          }, 300);
+        }, 3000);
+      }
+
+      // 加载支付信息
+      function loadPaymentInfo() {
+        const loadingElement = document.getElementById('payment-info-loading');
+        const plateInfoSection = document.getElementById('plate-info-section');
+        
+        // 显示加载状态
+        if (loadingElement) {
+          loadingElement.classList.remove('hidden');
+        }
+        
+        // 隐藏内容
+        if (plateInfoSection) {
+          plateInfoSection.classList.add('hidden');
+        }
+        
+        // 模拟加载过程
+        setTimeout(() => {
+          // 隐藏加载状态
+          if (loadingElement) {
+            loadingElement.classList.add('hidden');
+          }
+          
+          // 显示内容
+          if (plateInfoSection) {
+            plateInfoSection.classList.remove('hidden');
+          }
+          
+          // 从localStorage获取车牌信息
+          const storedPlateInfo = localStorage.getItem('plateInfo');
+          if (storedPlateInfo) {
+            const plateInfo = JSON.parse(storedPlateInfo);
+            const displayProvince = document.getElementById('display-province');
+            const displayPlate = document.getElementById('display-plate');
+            
+            if (displayProvince) {
+              displayProvince.textContent = plateInfo.province;
+            }
+            
+            if (displayPlate) {
+              displayPlate.textContent = plateInfo.number;
+            }
+          }
+        }, 600);
+      }
+
+      // 加载支付选择页信息
+      function loadPaymentSelectInfo() {
+        const loadingElement = document.getElementById('payment-select-loading');
+        
+        // 显示加载状态
+        if (loadingElement) {
+          loadingElement.classList.remove('hidden');
+        }
+        
+        // 从localStorage获取费用信息
+        const storedPaymentInfo = localStorage.getItem('paymentInfo');
+        if (storedPaymentInfo) {
+          const paymentInfo = JSON.parse(storedPaymentInfo);
+          const amountElement = document.getElementById('payment-select-amount');
+          
+          if (amountElement) {
+            amountElement.textContent = `¥${paymentInfo.totalFee}.00`;
+          }
+          
+          // 隐藏加载状态
+          if (loadingElement) {
+            loadingElement.classList.add('hidden');
+          }
+        } else {
+          // 如果没有费用信息，返回上一页
+          showToast('未找到缴费信息，请重新查询', 'error');
+          PageManager.showPage('payment-info');
+        }
+      }
+
+      // 显示支付成功信息
+      function showSuccessInfo() {
+        const loadingElement = document.getElementById('success-loading');
+        
+        // 显示加载状态
+        if (loadingElement) {
+          loadingElement.classList.remove('hidden');
+        }
+        
+        // 从localStorage获取支付结果
+        const storedPaymentResult = localStorage.getItem('paymentResult');
+        if (storedPaymentResult) {
+          const paymentResult = JSON.parse(storedPaymentResult);
+          const amountElement = document.getElementById('success-payment-amount');
+          const timeElement = document.getElementById('payment-time');
+          
+          if (amountElement) {
+            amountElement.textContent = `¥${paymentResult.amount}.00`;
+          }
+          
+          if (timeElement) {
+            timeElement.textContent = `支付时间: ${new Date().toLocaleString('zh-CN')}`;
+          }
+          
+          // 隐藏加载状态
+          if (loadingElement) {
+            loadingElement.classList.add('hidden');
+          }
+        } else {
+          // 如果没有支付结果，返回首页
+          showToast('未找到支付结果', 'error');
+          PageManager.showPage('home');
+        }
+      }
+
+      // 模拟与闸机控制接口的数据对接
+      function simulateGateControl() {
+        const plateInfo = localStorage.getItem('plateInfo');
+        const storedPaymentInfo = localStorage.getItem('paymentInfo');
+        
+        if (storedPaymentInfo) {
+          const paymentInfo = JSON.parse(storedPaymentInfo);
+          const paymentData = {
+            plateInfo: plateInfo ? JSON.parse(plateInfo) : null,
+            amount: paymentInfo.totalFee,
+            timestamp: new Date().toISOString(),
+            status: 'success',
+            paymentMethod: getSelectedPaymentMethod()
+          };
+
+          // 在实际应用中，这里会调用真实的API接口
+          console.log('向闸机控制接口发送数据:', paymentData);
+          
+          // 存储支付结果到localStorage
+          localStorage.setItem('paymentResult', JSON.stringify(paymentData));
+        }
+      }
+
+      // 获取选中的支付方式
+      function getSelectedPaymentMethod() {
+        const alipayOption = document.getElementById('alipay-option');
+        if (alipayOption && alipayOption.classList.contains('ring-2')) {
+          return 'alipay';
+        }
+        
+        const wechatOption = document.getElementById('wechat-option');
+        if (wechatOption && wechatOption.classList.contains('ring-2')) {
+          return 'wechat';
+        }
+        
+        return 'alipay'; // 默认返回支付宝
+      }
+
+      // 绑定事件处理程序
+      function bindEventHandlers() {
+        // 查询按钮点击事件
+        const queryButton = document.getElementById('query-button');
+        if (queryButton) {
+          queryButton.addEventListener('click', () => {
+            const plateNumberInput = document.getElementById('plate-number');
+            const inputError = document.getElementById('input-error');
+            
+            if (plateNumberInput) {
+              const plateNumber = plateNumberInput.value;
+              
+              // 验证车牌号码
+              if (!validatePlateNumber(plateNumber)) {
+                if (inputError) {
+                  inputError.querySelector('p').textContent = '请输入有效的车牌号码';
+                  inputError.classList.remove('hidden');
+                }
+                showToast('请输入有效的车牌号码', 'error');
+                return;
+              }
+              
+              // 隐藏错误提示
+              if (inputError) {
+                inputError.classList.add('hidden');
+              }
+              
+              // 存储车牌信息到localStorage
+              const selectedProvince = document.getElementById('selected-province');
+              if (selectedProvince) {
+                localStorage.setItem('plateInfo', JSON.stringify({
+                  province: selectedProvince.textContent,
+                  number: plateNumber.toUpperCase()
+                }));
+              }
+              
+              // 跳转到缴费信息页
+              PageManager.showPage('payment-info');
+            }
+          });
+        }
+        
+        // 车牌输入框输入事件
+        const plateNumberInput = document.getElementById('plate-number');
+        if (plateNumberInput) {
+          plateNumberInput.addEventListener('input', (e) => {
+            // 只允许输入字母和数字，自动转换为大写
+            const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            e.target.value = value;
+            
+            // 隐藏错误提示
+            const inputError = document.getElementById('input-error');
+            if (inputError && inputError.classList.contains('hidden') === false) {
+              inputError.classList.add('hidden');
+            }
+          });
+        }
+        
+        // 支付方式选择事件
+        const alipayOption = document.getElementById('alipay-option');
+        const wechatOption = document.getElementById('wechat-option');
+        
+        if (alipayOption) {
+          alipayOption.addEventListener('click', () => {
+            // 选中支付宝
+            alipayOption.classList.add('ring-2', 'ring-blue-500', 'shadow-lg');
+            wechatOption.classList.remove('ring-2', 'ring-green-500', 'shadow-lg');
+            
+            // 更新选中状态图标
+            const alipayCheck = alipayOption.querySelector('.rounded-full');
+            const wechatCheck = wechatOption.querySelector('.rounded-full');
+            
+            if (alipayCheck) {
+              alipayCheck.classList.add('border-blue-500', 'bg-blue-500');
+              alipayCheck.classList.remove('border-gray-300');
+              
+              // 添加对勾图标
+              if (alipayCheck.querySelector('i') === null) {
+                const checkIcon = document.createElement('i');
+                checkIcon.className = 'fa-solid fa-check text-white text-xs';
+                alipayCheck.appendChild(checkIcon);
+              }
+            }
+            
+            if (wechatCheck) {
+              wechatCheck.classList.remove('border-green-500', 'bg-green-500');
+              wechatCheck.classList.add('border-gray-300');
+              
+              // 移除对勾图标
+              const checkIcon = wechatCheck.querySelector('i');
+              if (checkIcon) {
+                wechatCheck.removeChild(checkIcon);
+              }
+            }
+          });
+        }
+        
+        if (wechatOption) {
+          wechatOption.addEventListener('click', () => {
+            // 选中微信支付
+            wechatOption.classList.add('ring-2', 'ring-green-500', 'shadow-lg');
+            alipayOption.classList.remove('ring-2', 'ring-blue-500', 'shadow-lg');
+            
+            // 更新选中状态图标
+            const wechatCheck = wechatOption.querySelector('.rounded-full');
+            const alipayCheck = alipayOption.querySelector('.rounded-full');
+            
+            if (wechatCheck) {
+              wechatCheck.classList.add('border-green-500', 'bg-green-500');
+              wechatCheck.classList.remove('border-gray-300');
+              
+              // 添加对勾图标
+              if (wechatCheck.querySelector('i') === null) {
+                const checkIcon = document.createElement('i');
+                checkIcon.className = 'fa-solid fa-check text-white text-xs';
+                wechatCheck.appendChild(checkIcon);
+              }
+            }
+            
+            if (alipayCheck) {
+              alipayCheck.classList.remove('border-blue-500', 'bg-blue-500');
+              alipayCheck.classList.add('border-gray-300');
+              
+              // 移除对勾图标
+              const checkIcon = alipayCheck.querySelector('i');
+              if (checkIcon) {
+                alipayCheck.removeChild(checkIcon);
+              }
+            }
+          });
+        }
+        
+        // 立即缴费按钮点击事件
+        const payNowButton = document.getElementById('pay-now-button');
+        if (payNowButton) {
+          payNowButton.addEventListener('click', () => {
+            // 模拟停车费用数据
+            const parkingData = {
+              startTime: '2025-10-14 14:49:38',
+              duration: '2小时30分钟',
+              feeDetails: '首小时10元，后续每小时5元',
+              totalFee: 20
+            };
+            
+            // 存储费用信息到localStorage
+            localStorage.setItem('paymentInfo', JSON.stringify(parkingData));
+            
+            // 更新按钮状态
+            payNowButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            payNowButton.classList.add('bg-gray-400');
+            payNowButton.disabled = true;
+            
+            const payButtonText = document.getElementById('pay-button-text');
+            if (payButtonText) {
+              payButtonText.innerHTML = '<div class="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>处理中...';
+            }
+            
+            // 模拟支付跳转过程
+            setTimeout(() => {
+              // 同时访问指定的gate-open链接
+              fetch('http://192.168.110.140:5153/gate-open')
+                .then(response => {
+                  if (!response.ok) {
+                    console.warn('访问闸机控制接口失败:', response.status);
+                  }
+                  return response.text();
+                })
+                .then(data => {
+                  console.log('闸机控制接口返回:', data);
+                })
+                .catch(error => {
+                  console.error('访问闸机控制接口出错:', error);
+                })
+                .finally(() => {
+                  // 模拟与闸机控制接口的数据对接
+                  simulateGateControl();
+                  
+                  // 跳转到支付成功页面
+                  PageManager.showPage('success');
+                });
+            }, 1000);
+          });
+        }
+        
+        // 确认支付按钮点击事件
+        const confirmPaymentButton = document.getElementById('confirm-payment-button');
+        if (confirmPaymentButton) {
+          confirmPaymentButton.addEventListener('click', () => {
+            // 更新按钮状态
+            confirmPaymentButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            confirmPaymentButton.classList.add('bg-gray-400');
+            confirmPaymentButton.disabled = true;
+            
+            const confirmButtonText = document.getElementById('confirm-button-text');
+            if (confirmButtonText) {
+              confirmButtonText.innerHTML = '<div class="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>处理中...';
+            }
+            
+            // 模拟支付跳转过程
+            setTimeout(() => {
+              // 模拟与闸机控制接口的数据对接
+              simulateGateControl();
+              
+              // 跳转到支付成功页面
+              PageManager.showPage('success');
+            }, 1000);
+          });
+        }
+        
+        // 返回首页按钮点击事件
+        const backToHomeButton = document.getElementById('back-to-home-button');
+        if (backToHomeButton) {
+          backToHomeButton.addEventListener('click', () => {
+            // 清除localStorage中的临时数据
+            localStorage.removeItem('plateInfo');
+            localStorage.removeItem('paymentInfo');
+            localStorage.removeItem('paymentResult');
+            
+            // 跳转回首页
+            PageManager.showPage('home');
+          });
+        }
+        
+        // 开闸按钮点击事件
+        const gateOpenBtn = document.getElementById('gate-open-btn');
+        if (gateOpenBtn) {
+          gateOpenBtn.addEventListener('click', () => {
+            fetch('http://192.168.110.140:5153/gate-open')
+              .then(response => {
+                if (!response.ok) {
+                  console.warn('访问开闸接口失败:', response.status);
+                  showToast('开闸操作失败', 'error');
+                } else {
+                  showToast('开闸操作已发送', 'success');
+                }
+                return response.text();
+              })
+              .then(data => {
+                console.log('开闸接口返回:', data);
+              })
+              .catch(error => {
+                console.error('访问开闸接口出错:', error);
+                showToast('开闸操作失败', 'error');
+              });
+          });
+        }
+        
+        // 关闸按钮点击事件
+        const gateCloseBtn = document.getElementById('gate-close-btn');
+        if (gateCloseBtn) {
+          gateCloseBtn.addEventListener('click', () => {
+            fetch('http://192.168.110.140:5153/gate-close')
+              .then(response => {
+                if (!response.ok) {
+                  console.warn('访问关闸接口失败:', response.status);
+                  showToast('关闸操作失败', 'error');
+                } else {
+                  showToast('关闸操作已发送', 'success');
+                }
+                return response.text();
+              })
+              .then(data => {
+                console.log('关闸接口返回:', data);
+              })
+              .catch(error => {
+                console.error('访问关闸接口出错:', error);
+                showToast('关闸操作失败', 'error');
+              });
+          });
+        }
+      }
+
+      // 初始化应用
+      function initApp() {
+        // 绑定事件处理程序
+        bindEventHandlers();
+        
+        // 显示首页
+        PageManager.showPage('home');
+      }
+
+      // 页面加载完成后初始化应用
+      document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+  </body>
 </html>
