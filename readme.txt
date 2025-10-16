@@ -37,4 +37,9 @@ $ python3 api.py
 // gate-web 启动
 $ cd /opt/gate-web
 $ source .venv/bin/activate
+
 $ python3 -m http.server 8080 --directory /opt/gate-web
+
+或
+
+$ python3 server.py
